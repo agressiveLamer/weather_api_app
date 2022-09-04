@@ -4,19 +4,19 @@ from django.db import models
 class Weather(models.Model):
     now = models.IntegerField(verbose_name="Время сервера в формате Unixtime.")
     now_dt = models.CharField(max_length=255, verbose_name="Время сервера в UTC.")
-    info = models.ForeignKey('Info', null=True, verbose_name="Информации о населенном пункте.",
-                             on_delete=models.CASCADE)
-    fact = models.ForeignKey('Fact', null=True, verbose_name="Фактической информации о погоде.",
-                             on_delete=models.CASCADE)
-    client = models.ForeignKey('Requset_client_info', null=True,
-                               verbose_name="Информацие о клиенте", on_delete=models.CASCADE)
+    info = models.OneToOneField('Info', null=True, verbose_name="Информации о населенном пункте.",
+                             on_delete=models.CASCADE, related_name='info')
+    fact = models.OneToOneField('Fact', null=True, verbose_name="Фактической информации о погоде.",
+                             on_delete=models.CASCADE, related_name='fact')
+    client = models.OneToOneField('Requset_client_info', null=True,
+                               verbose_name="Информацие о клиенте", on_delete=models.CASCADE, related_name='client')
 
 
 class Info(models.Model):
     lat = models.IntegerField(null=True, verbose_name="Широта (в градусах).")
     lon = models.IntegerField(null=True, verbose_name="Долгота (в градусах).")
-    tz = models.ForeignKey('Time_zone_info', null=True, verbose_name="Информация о часовом поясе.",
-                           on_delete=models.CASCADE)  # вернуться
+    tz = models.OneToOneField('Time_zone_info', null=True, verbose_name="Информация о часовом поясе.",
+                           on_delete=models.CASCADE, related_name='tz')  # вернуться
     def_pressure_mm = models.IntegerField(null=True,
                                           verbose_name="Норма давления для данной координаты (в мм рт. ст.).")
     def_pressure_pa = models.IntegerField(null=True,

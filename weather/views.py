@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import *
+from .serializers import *
 import requests
 import json
 
@@ -8,6 +8,38 @@ import json
 class WeatherAPIView(APIView):
     __URL = "https://api.weather.yandex.ru/v2/forecast"
     __TOKEN = "bd8d3566-ebc3-4c69-91b4-874499c1c112"
+
+    def post(self, request):
+        """serializer = WeatherSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                save_result = serializer.save()"""
+        r = request.data
+
+        fact_weather_data_creater = Fact.objects.create(temp=r['fact']['temp'],
+                                                        feels_like=r['fact']['feels_like'],
+                                                        icon=r['fact']['icon'],
+                                                        condition=r['fact']['condition'])
+        tzinfo_weather_data_creater = Time_zone_info.objects.create(offset=r['info']['tzinfo']['offset'],
+                                                                    name=r['info']['tzinfo']['name'],
+                                                                    abbr=r['info']['tzinfo']['abbr'],
+                                                                    dst=r['info']['tzinfo']['dst'])
+        info_weather_data_creater = Info.objects.create(lat=r['info']['lat'],
+                                                        lon=r['info']['lon'],
+                                                        url=r['info']['url'],
+                                                        tz=tzinfo_weather_data_creater,
+                                                        def_pressure_mm=r['info']['def_pressure_mm'],
+                                                        def_pressure_pa=r['info']['def_pressure_pa']
+                                                        )
+
+        save_result = Weather.objects.create(now=r['now'],
+                                             now_dt=r['now_dt'],
+                                             info=info_weather_data_creater,
+                                             fact=fact_weather_data_creater
+                                             )
+
+        return Response({"Message": "Запись успешно добавлена в БД",
+                         "Record_id": save_result.pk})
+
 
     def get(self, request, **kwargs):
         client = request.META
